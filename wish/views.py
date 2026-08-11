@@ -1,14 +1,26 @@
-from django.shortcuts import render
-from rest_framework import status
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from rest_framework import generics, mixins
 
-from .models import teacher
-from .serializers import teacherSerializer
+from .models import Teachers
+from .serializers import TeacherSerializer
 
-class teacherAPIView(APIView):
-    def get(self, request):
-        teachers = teacher.objects.all()
-        serializer = teacherSerializer(teachers, many=True)
-        return Response(serializer.data)
 
+# using mixin
+class TeacherListDeleteView(
+    mixins.RetrieveModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView
+):
+    queryset = Teachers.objects.all()
+    serializer_class = TeacherSerializer
+
+    # GET /teachers/<pk>/
+    def get(self, request, pk):
+        return self.retrieve(request, pk=pk)
+
+    # DELETE /teachers/<pk>/
+    def delete(self, request, pk):
+        return self.destroy(request, pk=pk)
+
+
+# without using mixin using
+class TeacherListCreateView(generics.ListCreateAPIView):
+    queryset = Teachers.objects.all()
+    serializer_class = TeacherSerializer
